@@ -1,0 +1,73 @@
+package dk.zai.anticheat.listeners;
+
+import dk.zai.anticheat.AntiCheatPlugin;
+import dk.zai.anticheat.ColorUtil;
+import dk.zai.anticheat.data.Punishment;
+import dk.zai.anticheat.data.PunishmentType;
+import dk.zai.anticheat.managers.LayoutsManager;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+
+/**
+ * Rejects banned players at login with the configured ban-screen layout
+ * (AdvancedBan-style multi-line Layout). Uses AsyncPlayerPreLoginEvent
+ * so the connection is dropped before the player enters the world.
+ */
+public class LoginListener implements Listener {
+
+    private final AntiCheatPlugin plugin;
+
+    public LoginListener(AntiCheatPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPreLogin(AsyncPlayerPreLoginEvent event) {
+        var pd = plugin.getDataManager().get(event.getUniqueId());
+        Punishment ban = plugin.getDataManager().getActiveBan(event.getUniqueId());
+        // Also check IP-based ban if the player's IP is known
+        if (ban == null) {
+            String ip = event.getAddress().getHostAddress();
+            for (Punishment p : plugin.getDataManager().getAllPunishments()) {
+                if (p.getType().isBanning() && p.getType().isIpVariant()
+                        && ip.equals(p.getTargetIp()) && !p.isExpired()) {
+                    ban = p;
+                    break;
+                }
+            }
+        }
+        if (ban != null) {
+            LayoutsManager L = plugin.getLayoutsManager();
+            Component screen = L.renderLayout(L.getMessageList(ban.getType().getConfigKey() + ".Layout"), ban);
+            // Pre-login kick message must be a String - serialize legacy
+            String plain = net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+                    .legacyAmpersand().serialize(screen);
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, plain);
+        }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        var pd = plugin.getDataManager().get(event.getPlayer().getUniqueId());
+        pd.setLastName(event.getPlayer().getName());
+        if (event.getPlayer().getAddress() != null) {
+            pd.setLastIp(event.getPlayer().getAddress().getAddress().getHostAddress());
+            plugin.getDataManager().cacheIp(pd.getLastIp(), event.getPlayer().getUniqueId());
+        }
+        plugin.getDataManager().cacheName(event.getPlayer().getName(), event.getPlayer().getUniqueId());
+
+        // Notify muted players on join
+        Punishment mute = plugin.getDataManager().getActiveMute(event.getPlayer().getUniqueId());
+        if (mute != null) {
+            LayoutsManager L = plugin.getLayoutsManager();
+            Component msg = L.renderLayout(L.getMessageList(mute.getType().getConfigKey() + ".Layout"), mute);
+            Bukkit.getScheduler().runTaskLater(plugin, () ->
+                    event.getPlayer().sendMessage(msg), 20L);
+        }
+    }
+}

@@ -1,0 +1,38 @@
+package dk.zai.anticheat.listeners;
+
+import dk.zai.anticheat.AntiCheatPlugin;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.inventory.ItemStack;
+
+/**
+ * Wind Charge listener - grants 3 seconds (configurable) of immunity
+ * from movement checks when a player launches a Wind Charge. This is
+ * required because Wind Charges drastically change player velocity and
+ * would otherwise produce false-positive Fly / Speed flags.
+ *
+ * 1.21.11 introduced the WIND_CHARGE Material which we hook into here.
+ */
+public class WindChargeListener implements Listener {
+
+    private final AntiCheatPlugin plugin;
+
+    public WindChargeListener(AntiCheatPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        if (!(event.getEntity().getShooter() instanceof Player player)) return;
+        // Wind Charge projectiles are of type AbstractWindCharge in 1.21+
+        String typeName = event.getEntity().getType().name();
+        if (typeName.equals("WIND_CHARGE") || typeName.equals("BREEZE_WIND_CHARGE")) {
+            long ms = plugin.getConfig().getLong("settings.wind-charge-immunity-ms", 3000L);
+            plugin.getDataManager().get(player.getUniqueId()).grantWindChargeImmunity(ms);
+        }
+    }
+}

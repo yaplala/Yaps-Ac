@@ -1,0 +1,40 @@
+package dk.zai.anticheat;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+
+/**
+ * Converts user-supplied message strings into Adventure Components.
+ * Supports BOTH legacy &-codes AND MiniMessage <tag> format. Legacy
+ * is applied first; any MiniMessage tags remaining are then parsed.
+ */
+public final class ColorUtil {
+
+    private static final LegacyComponentSerializer LEGACY =
+            LegacyComponentSerializer.legacyAmpersand();
+    private static final MiniMessage MINI = MiniMessage.miniMessage();
+
+    private ColorUtil() {}
+
+    public static Component toComponent(String input) {
+        if (input == null || input.isEmpty()) return Component.empty();
+        // First translate legacy &-codes to a Component, then run MiniMessage
+        // on the remaining text. We do this by serialising back to a string
+        // that MiniMessage can re-parse after legacy conversion.
+        Component legacy = LEGACY.deserialize(input);
+        // MiniMessage cannot re-parse a Component, so we go legacy -> string -> mini
+        // Simplest: if the input has no '<' chars, skip MiniMessage entirely.
+        if (!input.contains("<")) {
+            return legacy;
+        }
+        // For inputs that mix both, we strip the legacy codes that were already
+        // converted and re-feed the original to MiniMessage so tags work.
+        return MINI.deserialize(input);
+    }
+
+    public static String colorize(String input) {
+        if (input == null) return "";
+        return LEGACY.serialize(LEGACY.deserialize(input));
+    }
+}

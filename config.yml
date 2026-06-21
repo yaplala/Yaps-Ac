@@ -1,0 +1,56 @@
+package dk.zai.anticheat.listeners;
+
+import dk.zai.anticheat.AntiCheatPlugin;
+import dk.zai.anticheat.checks.combat.*;
+import dk.zai.anticheat.checks.exploits.InvalidPacketsCheck;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+
+/**
+ * Aggregates all combat checks: KillAura, Reach, SilentAim, AutoClicker.
+ */
+public class CombatListener implements Listener {
+
+    private final AntiCheatPlugin plugin;
+    private final KillAuraCheck killAura;
+    private final ReachCheck reach;
+    private final SilentAimCheck silentAim;
+    private final AutoClickerCheck autoClicker;
+    private final InvalidPacketsCheck invalidPackets;
+
+    public CombatListener(AntiCheatPlugin plugin) {
+        this.plugin = plugin;
+        this.killAura = plugin.getChecks().killAura;
+        this.reach = plugin.getChecks().reach;
+        this.silentAim = plugin.getChecks().silentAim;
+        this.autoClicker = plugin.getChecks().autoClicker;
+        this.invalidPackets = plugin.getChecks().invalidPackets;
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onAttack(EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player attacker)) return;
+        Entity target = event.getEntity();
+        invalidPackets.onPacket(attacker);
+
+        killAura.onAttack(attacker, target, event);
+        reach.onAttack(attacker, target, event);
+        silentAim.onAttack(attacker, target, event);
+
+        // Track last combat time for TriggerBot window
+        plugin.getDataManager().get(attacker.getUniqueId()).setLastCombatTime(System.currentTimeMillis());
+    }
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onInteract(PlayerInteractEvent event) {
+        if (event.getAction().isLeftClick()) {
+            autoClicker.onClick(event.getPlayer(), event);
+            invalidPackets.onPacket(event.getPlayer());
+        }
+    }
+}
