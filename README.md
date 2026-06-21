@@ -1,32 +1,59 @@
 🔧 Commands
 Command	Permission	Description
 /yaps	yaps.admin	Open the admin GUI (or yaps.gui)
+
 /yaps reload	yaps.admin	Reload config + messages
+
 /yaps reset <player>	yaps.admin	Reset player's VL
+
 /yaps status <player>	yaps.admin	Show player VL/mute/ban
+
 /yaps checks	yaps.admin	List all checks
+
 /ban (-s) <name> <reason>	ab.ban	Permanent ban
+
 /tempban (-s) <name> <time> <reason>	ab.tempban	Temporary ban
+
 /ipban (-s) <name/IP> <reason>	ab.ipban	IP ban
+
 /tempipban (-s) <name/IP> <time> <reason>	ab.tempipban	Temporary IP ban
+
 /mute (-s) <name> <reason>	ab.mute	Permanent mute
+
 /tempmute (-s) <name> <time> <reason>	ab.tempmute	Temporary mute
+
 /kick (-s) <name> <reason>	ab.kick	Kick
+
 /warn (-s) <name> <reason>	ab.warn	Warn
+
 /tempwarn (-s) <name> <time> <reason>	ab.tempwarn	Temporary warn
+
 /note <name> <reason>	ab.note	Add private note
+
 /unban <name>	ab.unban	Unban
+
 /unmute <name>	ab.unmute	Unmute
+
 /unwarn <id>	ab.unwarn	Revoke warn by ID
+
 /unnote <id>	ab.unnote	Revoke note by ID
+
 /unpunish <id>	ab.unpunish	Delete any punishment by ID
+
 /change-reason <id> <reason>	ab.change-reason	Edit punishment reason
+
 /banlist [page]	ab.banlist	View active bans
+
 /history <name> [page]	ab.history	Player punishment history
+
 /warns [name] [page]	ab.warns.self / ab.warns.other	View warns
+
 /notes <name> [page]	ab.notes	View notes
+
 /check <name>	ab.check	Full player info
+
 Time format: Xmo, Xd, Xh, Xm, Xs (e.g. 1mo2d3h, 30m, perma)
+
 
 🔑 Permissions
 Node	Default	Description
