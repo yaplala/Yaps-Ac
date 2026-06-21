@@ -56,22 +56,41 @@ Time format: Xmo, Xd, Xh, Xm, Xs (e.g. 1mo2d3h, 30m, perma)
 
 
 🔑 Permissions
+
 Node	Default	Description
+
 yaps.admin	op	Access /yaps admin commands
+
 yaps.alerts	op	Receive anti-cheat alerts in chat
+
 yaps.bypass	false	Bypass ALL anti-cheat checks
+
 yaps.gui	op	Open the admin GUI
+
 ab.all / ab.*	false	Wildcard — grant every ab.* node
+
 ab.ban, ab.tempban, ab.ipban, ab.tempipban	op	Ban commands
+
 ab.mute, ab.tempmute, ab.kick	op	Mute / kick commands
+
 ab.warn, ab.tempwarn, ab.note	op	Warn / note commands
+
 ab.unban, ab.unmute, ab.unwarn, ab.unnote, ab.unpunish	op	Revoke commands
+
 ab.change-reason	op	Edit punishment reason
+
 ab.banlist, ab.history, ab.notes, ab.check	op	Lookup commands
+
 ab.warns.self	true	View own warns
+
 ab.warns.other	op	View others' warns
+
 ab.notify	op	See punishment broadcasts
+
 ab.notify.silent	false	See silent (-s) punishment broadcasts
+
 ab.undo.notify	op	See undo notifications
+
 ab.tempban.dur.1 / .2 / .3 / .max	—	Duration cap tiers (600s / 3600s / 43200s / unlimited)
+
 Same pattern applies for ab.tempwarn.dur.*, ab.tempmute.dur.*, ab.tempipban.dur.*.
